@@ -164,6 +164,8 @@ public class LibraryController {
      * Set up pagination controls.
      */
     private void setupPagination() {
+        // Populate page size options
+        pageSizeComboBox.getItems().addAll(10, 25, 50, 100);
         pageSizeComboBox.setValue(pageSize);
         updatePaginationButtons();
     }

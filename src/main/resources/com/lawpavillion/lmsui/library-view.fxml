@@ -82,16 +82,7 @@
             <Button fx:id="lastPageButton" text="Last" onAction="#handleLastPage"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Label text="Items per page:"/>
-            <ComboBox fx:id="pageSizeComboBox" onAction="#handlePageSizeChange">
-                <items>
-                    <javafx.collections.FXCollections fx:factory="observableArrayList">
-                        <Integer fx:value="10"/>
-                        <Integer fx:value="25"/>
-                        <Integer fx:value="50"/>
-                        <Integer fx:value="100"/>
-                    </javafx.collections.FXCollections>
-                </items>
-            </ComboBox>
+            <ComboBox fx:id="pageSizeComboBox" onAction="#handlePageSizeChange"/>
         </HBox>
     </VBox>
 </VBox>
