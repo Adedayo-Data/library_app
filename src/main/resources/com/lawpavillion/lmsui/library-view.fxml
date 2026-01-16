@@ -39,7 +39,7 @@
     <!-- Main Content Area -->
     <VBox styleClass="content-container" VBox.vgrow="ALWAYS">
         <!-- Action Buttons Row -->
-        <HBox spacing="12" alignment="CENTER_LEFT">
+        <HBox styleClass="action-bar" spacing="12" alignment="CENTER_LEFT">
             <Button fx:id="refreshButton" text="Refresh" onAction="#handleRefresh"/>
             <Button fx:id="deleteSelectedButton" text="Delete Selected" styleClass="button-danger" 
                     onAction="#handleDeleteSelected" disable="true"/>

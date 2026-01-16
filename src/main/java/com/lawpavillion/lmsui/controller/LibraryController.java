@@ -4,6 +4,9 @@ import com.lawpavillion.lmsui.model.Book;
 import com.lawpavillion.lmsui.service.ApiService;
 import com.lawpavillion.lmsui.util.DialogUtils;
 import com.lawpavillion.lmsui.util.ValidationUtils;
+import javafx.animation.FadeTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.Interpolator;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -15,6 +18,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.springframework.data.domain.Page;
 
@@ -72,6 +76,7 @@ public class LibraryController {
     public void initialize() {
         setupTableColumns();
         setupPagination();
+        setupAnimations();
         loadBooks();
         
         // Set up double-click to edit
@@ -84,6 +89,20 @@ public class LibraryController {
             });
             return row;
         });
+    }
+
+    /**
+     * Set up smooth animations for UI elements.
+     */
+    private void setupAnimations() {
+        // Initial fade-in for table
+        bookTable.setOpacity(0);
+        FadeTransition fadeIn = new FadeTransition(Duration.millis(600), bookTable);
+        fadeIn.setFromValue(0.0);
+        fadeIn.setToValue(1.0);
+        fadeIn.setInterpolator(Interpolator.EASE_OUT);
+        fadeIn.setDelay(Duration.millis(100));
+        fadeIn.play();
     }
 
     /**
