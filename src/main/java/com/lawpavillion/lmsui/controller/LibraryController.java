@@ -187,10 +187,18 @@ public class LibraryController {
             totalElements = page.getTotalElements();
             
             updatePaginationInfo();
-            updateStatus("Loaded " + bookList.size() + " books");
+            
+            // Show appropriate status message
+            if (bookList.isEmpty()) {
+                updateStatus("No books found. Click + to add your first book!");
+            } else {
+                updateStatus("Loaded " + bookList.size() + " books");
+            }
         } catch (Exception e) {
-            DialogUtils.showError("Error", "Failed to load books: " + e.getMessage());
-            updateStatus("Error loading books");
+            // Log error but don't show popup for connection issues
+            System.err.println("Error loading books: " + e.getMessage());
+            e.printStackTrace();
+            updateStatus("Unable to connect to server. Please check if backend is running.");
         }
     }
 

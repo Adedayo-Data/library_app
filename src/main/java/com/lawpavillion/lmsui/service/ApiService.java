@@ -58,7 +58,7 @@ public class ApiService {
 
     /**
      * Fetch books with pagination support.
-     * Expects backend to return Spring Data Page format.
+     * Expects backend to return ApiResponse<Page<Book>> format.
      */
     public Page<Book> getBooks(int page, int size) {
         try {
@@ -66,9 +66,29 @@ public class ApiService {
             ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
             
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                // Parse the Page response from Spring Data
-                Map<String, Object> pageData = gson.fromJson(response.getBody(), Map.class);
+                // Parse the ApiResponse wrapper
+                Map<String, Object> apiResponse = gson.fromJson(response.getBody(), Map.class);
+                
+                // Check if the response was successful
+                Boolean success = (Boolean) apiResponse.get("success");
+                if (success == null || !success) {
+                    System.err.println("API returned unsuccessful response");
+                    return Page.empty();
+                }
+                
+                // Extract the data (which contains the Page)
+                Map<String, Object> pageData = (Map<String, Object>) apiResponse.get("data");
+                if (pageData == null) {
+                    // No data means empty result, not an error
+                    return Page.empty();
+                }
+                
+                // Extract content array
                 List<Map<String, Object>> content = (List<Map<String, Object>>) pageData.get("content");
+                if (content == null || content.isEmpty()) {
+                    // Empty content is valid, just return empty page
+                    return Page.empty();
+                }
                 
                 // Convert content to Book objects
                 Book[] books = new Book[content.size()];
@@ -77,7 +97,6 @@ public class ApiService {
                 }
                 
                 // Extract pagination metadata
-                Map<String, Object> pageable = (Map<String, Object>) pageData.get("pageable");
                 int totalElements = ((Double) pageData.get("totalElements")).intValue();
                 int totalPages = ((Double) pageData.get("totalPages")).intValue();
                 
@@ -86,9 +105,9 @@ public class ApiService {
             return Page.empty();
         } catch (Exception e) {
             System.err.println("Error fetching paginated books: " + e.getMessage());
-            // Fallback to non-paginated if pagination not supported
-            List<Book> allBooks = getAllBooks();
-            return new PageImpl<>(allBooks, PageRequest.of(page, size), allBooks.size());
+            e.printStackTrace();
+            // Return empty page instead of throwing exception
+            return Page.empty();
         }
     }
 
@@ -103,9 +122,12 @@ public class ApiService {
             String bookJson = gson.toJson(book);
             HttpEntity<String> request = new HttpEntity<>(bookJson, headers);
             
-            ResponseEntity<Book> response = restTemplate.postForEntity(BASE_URL, request, Book.class);
+            ResponseEntity<String> response = restTemplate.postForEntity(BASE_URL, request, String.class);
             if (response.getStatusCode() == HttpStatus.CREATED || response.getStatusCode() == HttpStatus.OK) {
-                return response.getBody();
+                // Parse ApiResponse wrapper
+                Map<String, Object> apiResponse = gson.fromJson(response.getBody(), Map.class);
+                Map<String, Object> bookData = (Map<String, Object>) apiResponse.get("data");
+                return gson.fromJson(gson.toJson(bookData), Book.class);
             }
             throw new RuntimeException("Failed to add book");
         } catch (Exception e) {
@@ -126,10 +148,13 @@ public class ApiService {
             HttpEntity<String> request = new HttpEntity<>(bookJson, headers);
             
             String url = BASE_URL + "/" + id;
-            ResponseEntity<Book> response = restTemplate.exchange(url, HttpMethod.PUT, request, Book.class);
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, request, String.class);
             
             if (response.getStatusCode() == HttpStatus.OK) {
-                return response.getBody();
+                // Parse ApiResponse wrapper
+                Map<String, Object> apiResponse = gson.fromJson(response.getBody(), Map.class);
+                Map<String, Object> bookData = (Map<String, Object>) apiResponse.get("data");
+                return gson.fromJson(gson.toJson(bookData), Book.class);
             }
             throw new RuntimeException("Failed to update book");
         } catch (Exception e) {
