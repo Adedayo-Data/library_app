@@ -134,40 +134,49 @@
 /* ===== DATE PICKER CALENDAR STYLING ===== */
 /* Reduce overall calendar size */
 .date-picker-popup>*>.calendar {
-    -fx-padding: 8;
-}
-
-/* Reduce month/year navigation button padding */
-.date-picker-popup>*>.month-year-pane {
     -fx-padding: 4;
 }
 
+/* Remove month/year navigation padding completely */
+.date-picker-popup>*>.month-year-pane {
+    -fx-padding: 0;
+    -fx-max-width: 240;
+}
+
 .date-picker-popup>*>.month-year-pane>.spinner {
-    -fx-spacing: 2;
+    -fx-spacing: 0;
 }
 
-/* Reduce arrow button padding significantly */
+/* Aggressively reduce arrow button size */
 .date-picker-popup>*>.month-year-pane>.spinner>.button {
-    -fx-padding: 2 4;
-    -fx-pref-width: 24;
-    -fx-pref-height: 24;
+    -fx-padding: 0;
+    -fx-pref-width: 16;
+    -fx-pref-height: 16;
+    -fx-max-width: 16;
+    -fx-max-height: 16;
+    -fx-min-width: 16;
+    -fx-min-height: 16;
 }
 
-/* Reduce label spacing */
+/* Constrain label width */
 .date-picker-popup>*>.month-year-pane>.spinner>.label {
-    -fx-padding: 2 8;
+    -fx-padding: 0 2;
+    -fx-max-width: 60;
+    -fx-font-size: 12px;
 }
 
 /* Make calendar cells more compact */
 .date-picker-popup>*>.calendar>.calendar-grid {
-    -fx-padding: 4;
+    -fx-padding: 2;
 }
 
 .date-picker-popup>*>.calendar>.calendar-grid>.day-cell {
-    -fx-padding: 4;
-    -fx-pref-width: 28;
-    -fx-pref-height: 28;
+    -fx-padding: 2;
+    -fx-pref-width: 26;
+    -fx-pref-height: 26;
 }
+
+
 
 .icon-button {
     -fx-background-color: transparent;
