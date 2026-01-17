@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.lawpavillion.lmsui.controller.LibraryController"
+      stylesheets="@styles.css">
+
+    <!-- Navigation Bar -->
+    <HBox styleClass="nav-bar" alignment="CENTER_LEFT" spacing="16">
+        <!-- Logo Icon -->
+        <FontIcon iconLiteral="mdi2b-book-open-page-variant" iconSize="24" iconColor="#1F2937"/>
+        
+        <!-- Title -->
+        <Label text="Library Management System" styleClass="nav-title"/>
+        
+        <!-- Spacer -->
+        <Region HBox.hgrow="ALWAYS"/>
+        
+        <!-- Search Button -->
+        <Button fx:id="searchButton" styleClass="icon-button" onAction="#handleSearch">
+            <graphic>
+                <FontIcon iconLiteral="mdi2m-magnify" iconSize="20" iconColor="#6B7280"/>
+            </graphic>
+        </Button>
+        
+        <!-- Add Book Button -->
+        <Button fx:id="addButton" styleClass="icon-button" onAction="#handleAdd">
+            <graphic>
+                <FontIcon iconLiteral="mdi2p-plus" iconSize="20" iconColor="#6B7280"/>
+            </graphic>
+        </Button>
+    </HBox>
+
+    <!-- Main Content Area -->
+    <VBox styleClass="content-container" VBox.vgrow="ALWAYS">
+        <!-- Action Buttons Row -->
+        <HBox styleClass="action-bar" spacing="12" alignment="CENTER_LEFT">
+            <Button fx:id="refreshButton" text="Refresh" onAction="#handleRefresh"/>
+            <Button fx:id="deleteSelectedButton" text="Delete Selected" styleClass="button-danger" 
+                    onAction="#handleDeleteSelected" disable="true"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="statusLabel" styleClass="label-secondary" text="Ready"/>
+        </HBox>
+
+        <!-- Table View -->
+        <TableView fx:id="bookTable" VBox.vgrow="ALWAYS">
+            <columns>
+                <!-- Checkbox Column -->
+                <TableColumn fx:id="selectColumn" text="" prefWidth="50" sortable="false"/>
+                
+                <!-- Title Column -->
+                <TableColumn fx:id="titleColumn" text="Title" prefWidth="250"/>
+                
+                <!-- Author Column -->
+                <TableColumn fx:id="authorColumn" text="Author" prefWidth="200"/>
+                
+                <!-- ISBN Column -->
+                <TableColumn fx:id="isbnColumn" text="ISBN" prefWidth="150"/>
+                
+                <!-- Published Date Column -->
+                <TableColumn fx:id="publishedDateColumn" text="Published Date" prefWidth="150"/>
+                
+                <!-- Status Column -->
+                <TableColumn fx:id="statusColumn" text="Status" prefWidth="120"/>
+            </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+            </columnResizePolicy>
+        </TableView>
+
+        <!-- Pagination Controls -->
+        <HBox spacing="12" alignment="CENTER" styleClass="pagination">
+            <Button fx:id="firstPageButton" text="First" onAction="#handleFirstPage"/>
+            <Button fx:id="prevPageButton" text="Previous" onAction="#handlePreviousPage"/>
+            <Label fx:id="pageLabel" text="Page 1 of 1"/>
+            <Button fx:id="nextPageButton" text="Next" onAction="#handleNextPage"/>
+            <Button fx:id="lastPageButton" text="Last" onAction="#handleLastPage"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="Items per page:"/>
+            <ComboBox fx:id="pageSizeComboBox" onAction="#handlePageSizeChange"/>
+        </HBox>
+    </VBox>
+</VBox>
