@@ -148,45 +148,22 @@ The application communicates with the Spring Boot backend using RestTemplate. Th
 **Paginated Response:**
 ```json
 {
-  "success": true,
-  "message": "All books delivered successfully!",
-  "data": {
-    "content": [
-      {
-        "id": 1,
-        "title": "Book Title",
-        "author": "Author Name",
-        "isbn": "9780123456789",
-        "publishedDate": "2020-01-15"
-      }
-    ],
-    "pageable": {
-      "pageNumber": 0,
-      "pageSize": 25,
-      "sort": {
-        "sorted": true,
-        "unsorted": false,
-        "empty": false
-      },
-      "offset": 0,
-      "paged": true,
-      "unpaged": false
-    },
-    "totalPages": 4,
-    "totalElements": 100,
-    "last": false,
-    "size": 25,
-    "number": 0,
-    "sort": {
-      "sorted": true,
-      "unsorted": false,
-      "empty": false
-    },
-    "numberOfElements": 25,
-    "first": true,
-    "empty": false
+  "content": [
+    {
+      "id": 1,
+      "title": "Book Title",
+      "author": "Author Name",
+      "isbn": "9780123456789",
+      "publishedDate": "2020-01-15",
+      "status": "Available"
+    }
+  ],
+  "pageable": {
+    "pageNumber": 0,
+    "pageSize": 25
   },
-  "timestamp": "2024-01-17T10:30:00"
+  "totalElements": 100,
+  "totalPages": 4
 }
 ```
 
@@ -246,4 +223,4 @@ This project is part of a recruitment exercise.
 ## Developer
 
 Adedayo Theophilus Adedeji
-[adedejitheophilus2018@gmail.com](mailto:adedejitheophilus2018@gmail.com)
+adedejitheophilus2018@gmail.com

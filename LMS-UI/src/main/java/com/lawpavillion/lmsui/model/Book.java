@@ -13,6 +13,7 @@ public class Book {
     private String isbn;
     private LocalDate publishedDate;
     private String status; // e.g., "Available", "Borrowed"
+    private boolean selected; // UI selection state
 
     // Default constructor
     public Book() {
@@ -30,6 +31,14 @@ public class Book {
     }
 
     // Getters and Setters
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+    }
+
     public Long getId() {
         return id;
     }

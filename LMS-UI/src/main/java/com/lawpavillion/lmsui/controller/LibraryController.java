@@ -5,21 +5,19 @@ import com.lawpavillion.lmsui.service.ApiService;
 import com.lawpavillion.lmsui.util.DialogUtils;
 import com.lawpavillion.lmsui.util.ValidationUtils;
 import javafx.animation.FadeTransition;
-import javafx.animation.ScaleTransition;
+import javafx.animation.PauseTransition;
 import javafx.animation.Interpolator;
 import javafx.application.Platform;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.util.Duration;
-import org.kordamp.ikonli.javafx.FontIcon;
 import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
@@ -27,6 +25,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Main controller for the Library Management System UI.
@@ -40,13 +39,13 @@ public class LibraryController {
     @FXML private TableColumn<Book, String> authorColumn;
     @FXML private TableColumn<Book, String> isbnColumn;
     @FXML private TableColumn<Book, String> publishedDateColumn;
-    @FXML private TableColumn<Book, String> statusColumn;
 
     @FXML private Button searchButton;
     @FXML private Button addButton;
     @FXML private Button refreshButton;
     @FXML private Button deleteSelectedButton;
     @FXML private Label statusLabel;
+    @FXML private Label totalBooksLabel;
 
     // Pagination controls
     @FXML private Button firstPageButton;
@@ -54,7 +53,24 @@ public class LibraryController {
     @FXML private Button nextPageButton;
     @FXML private Button lastPageButton;
     @FXML private Label pageLabel;
-    @FXML private ComboBox<Integer> pageSizeComboBox;
+    @FXML private Label pageNumberLabel;
+
+    // Modal & Toast Controls
+    @FXML private StackPane modalOverlay;
+    @FXML private StackPane deleteOverlay;
+    @FXML private StackPane searchOverlay;
+    @FXML private TextField searchField;
+    @FXML private HBox activeSearchChip;
+    @FXML private Label activeSearchLabel;
+    @FXML private VBox toastOverlay;
+    @FXML private Label toastLabel;
+    
+    // Modal Form Fields
+    @FXML private Label modalTitle;
+    @FXML private TextField titleField;
+    @FXML private TextField authorField;
+    @FXML private TextField isbnField;
+    @FXML private DatePicker datePicker;
 
     private final ApiService apiService;
     private final ObservableList<Book> bookList;
@@ -65,6 +81,13 @@ public class LibraryController {
     private int pageSize = 25;
     private int totalPages = 1;
     private long totalElements = 0;
+
+    // State for the book currently being edited (null if adding new)
+    // State for the book currently being edited (null if adding new)
+    private Book currentBookInModal = null;
+    
+    // State for search
+    private String currentSearchQuery = "";
 
     public LibraryController() {
         this.apiService = new ApiService();
@@ -77,6 +100,7 @@ public class LibraryController {
         setupTableColumns();
         setupPagination();
         setupAnimations();
+        
         loadBooks();
         
         // Set up double-click to edit
@@ -154,28 +178,6 @@ public class LibraryController {
             return new SimpleStringProperty(formattedDate);
         });
 
-        // Status column with badge styling
-        statusColumn.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(String status, boolean empty) {
-                super.updateItem(status, empty);
-                if (empty || status == null) {
-                    setText(null);
-                    setGraphic(null);
-                } else {
-                    Label badge = new Label(status);
-                    badge.getStyleClass().add("status-badge");
-                    if ("Available".equalsIgnoreCase(status)) {
-                        badge.getStyleClass().add("status-available");
-                    } else {
-                        badge.getStyleClass().add("status-borrowed");
-                    }
-                    setGraphic(badge);
-                }
-            }
-        });
-        statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-
         bookTable.setItems(bookList);
     }
 
@@ -183,9 +185,6 @@ public class LibraryController {
      * Set up pagination controls.
      */
     private void setupPagination() {
-        // Populate page size options
-        pageSizeComboBox.getItems().addAll(10, 25, 50, 100);
-        pageSizeComboBox.setValue(pageSize);
         updatePaginationButtons();
     }
 
@@ -193,45 +192,44 @@ public class LibraryController {
      * Load books from the backend with pagination.
      */
     private void loadBooks() {
-        try {
-            updateStatus("Loading books...");
-            
-            // Use pagination if backend supports it
-            Page<Book> page = apiService.getBooks(currentPage, pageSize);
-            
-            bookList.clear();
-            bookList.addAll(page.getContent());
-            
-            totalPages = page.getTotalPages();
-            totalElements = page.getTotalElements();
-            
-            updatePaginationInfo();
-            
-            // Show appropriate status message
-            if (bookList.isEmpty()) {
-                updateStatus("No books found. Click + to add your first book!");
-            } else {
-                updateStatus("Loaded " + bookList.size() + " books");
+        Platform.runLater(() -> {
+            try {
+                updateStatus("Loading books...");
+                Page<Book> page;
+                if (currentSearchQuery == null || currentSearchQuery.isEmpty()) {
+                    page = apiService.getBooks(currentPage, pageSize);
+                } else {
+                    page = apiService.searchBooks(currentSearchQuery, currentPage, pageSize);
+                }
+                
+                bookList.setAll(page.getContent());
+                // bookTable.setItems(bookList); // Already set in initialize, no need to set again unless list reference changes
+                
+                totalElements = page.getTotalElements();
+                totalPages = page.getTotalPages();
+                
+                updatePaginationInfo();
+                
+                if (bookList.isEmpty()) {
+                    updateStatus("No books found. Click + to add your first book!");
+                } else {
+                    updateStatus("Loaded " + bookList.size() + " books");
+                }
+            } catch (Exception e) {
+                System.err.println("Error loading books: " + e.getMessage());
+                e.printStackTrace();
+                updateStatus("Unable to connect to server. Please check if backend is running.");
             }
-        } catch (Exception e) {
-            // Log error but don't show popup for connection issues
-            System.err.println("Error loading books: " + e.getMessage());
-            e.printStackTrace();
-            updateStatus("Unable to connect to server. Please check if backend is running.");
-        }
+        });
     }
 
-    /**
-     * Update pagination information and button states.
-     */
     private void updatePaginationInfo() {
         pageLabel.setText("Page " + (currentPage + 1) + " of " + Math.max(1, totalPages));
+        pageNumberLabel.setText(String.valueOf(currentPage + 1));
+        totalBooksLabel.setText("Total Books: " + totalElements);
         updatePaginationButtons();
     }
 
-    /**
-     * Update pagination button enabled/disabled states.
-     */
     private void updatePaginationButtons() {
         firstPageButton.setDisable(currentPage == 0);
         prevPageButton.setDisable(currentPage == 0);
@@ -239,49 +237,69 @@ public class LibraryController {
         lastPageButton.setDisable(currentPage >= totalPages - 1);
     }
 
-    /**
-     * Update status label.
-     */
     private void updateStatus(String message) {
         Platform.runLater(() -> statusLabel.setText(message));
     }
 
-    /**
-     * Update delete button state based on selection.
-     */
     private void updateDeleteButtonState() {
-        deleteSelectedButton.setDisable(selectedBooks.isEmpty());
+        boolean hasSelection = !selectedBooks.isEmpty();
+        deleteSelectedButton.setDisable(!hasSelection);
+        deleteSelectedButton.setVisible(hasSelection);
+        deleteSelectedButton.setManaged(hasSelection);
     }
 
     // ===== EVENT HANDLERS =====
 
     @FXML
     private void handleAdd() {
-        showBookDialog(null);
+        currentBookInModal = null;
+        openModal("Add New Book", null);
     }
 
     @FXML
     private void handleSearch() {
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Search Books");
-        dialog.setHeaderText("Search by title or author");
-        dialog.setContentText("Enter search term:");
-
-        Optional<String> result = dialog.showAndWait();
-        result.ifPresent(query -> {
-            if (query.trim().isEmpty()) {
-                loadBooks();
-            } else {
-                try {
-                    List<Book> searchResults = apiService.searchBooks(query);
-                    bookList.clear();
-                    bookList.addAll(searchResults);
-                    updateStatus("Found " + searchResults.size() + " books");
-                } catch (Exception e) {
-                    DialogUtils.showError("Error", "Search failed: " + e.getMessage());
-                }
-            }
-        });
+        // Open Search Modal
+        searchField.clear();
+        searchOverlay.setVisible(true);
+        searchField.requestFocus();
+    }
+    
+    @FXML
+    private void handlePerformSearch() {
+        String query = searchField.getText().trim();
+        if (query.isEmpty()) {
+            showToast("Please enter a search term", "warning");
+            return;
+        }
+        
+        currentSearchQuery = query;
+        currentPage = 0; // Reset to first page
+        loadBooks(); // loadBooks will handle the search query
+        
+        searchOverlay.setVisible(false);
+        showToast("Showing results for: " + query, "success");
+        
+        // Show Chip
+        activeSearchLabel.setText("Results for: \"" + query + "\"");
+        activeSearchChip.setVisible(true);
+        activeSearchChip.setManaged(true);
+    }
+    
+    @FXML
+    private void handleClearSearch() {
+        currentSearchQuery = "";
+        searchField.clear();
+        
+        activeSearchChip.setVisible(false);
+        activeSearchChip.setManaged(false);
+        
+        loadBooks();
+        showToast("Search cleared", "info");
+    }
+    
+    @FXML
+    private void handleCancelSearch() {
+        searchOverlay.setVisible(false);
     }
 
     @FXML
@@ -289,44 +307,186 @@ public class LibraryController {
         selectedBooks.clear();
         updateDeleteButtonState();
         loadBooks();
+        showToast("Refreshed list", "success");
     }
 
     @FXML
     private void handleDeleteSelected() {
+        // Just show the modal
+        deleteOverlay.setVisible(true);
+    }
+
+    @FXML
+    private void handleConfirmDelete() {
+        List<Book> selectedBooks = bookTable.getItems().stream()
+                .filter(Book::isSelected)
+                .collect(Collectors.toList());
+
         if (selectedBooks.isEmpty()) {
+            showToast("No books selected", "error");
+            deleteOverlay.setVisible(false);
             return;
         }
 
-        String message = "Are you sure you want to delete " + selectedBooks.size() + " book(s)?";
-        if (DialogUtils.showConfirmation("Confirm Delete", message)) {
-            int successCount = 0;
-            int failCount = 0;
+        List<Long> idsToDelete = selectedBooks.stream()
+                .map(Book::getId)
+                .collect(Collectors.toList());
 
-            for (Book book : new ArrayList<>(selectedBooks)) {
-                try {
-                    apiService.deleteBook(book.getId());
-                    successCount++;
-                } catch (Exception e) {
-                    failCount++;
-                    System.err.println("Failed to delete book: " + book.getTitle());
-                }
-            }
+        // Call backend
+        apiService.deleteBooks(idsToDelete);
 
-            selectedBooks.clear();
-            updateDeleteButtonState();
-            loadBooks();
+        // Success
+        showToast("Book(s) deleted successfully", "success");
+        loadBooks();
+        deleteSelectedButton.setDisable(true);
+        deleteSelectedButton.setVisible(false);
+        deleteSelectedButton.setManaged(false);
+        
+        // Hide modal
+        deleteOverlay.setVisible(false);
+    }
 
-            if (failCount == 0) {
-                DialogUtils.showSuccess("Success", "Deleted " + successCount + " book(s)");
-            } else {
-                DialogUtils.showWarning("Partial Success", 
-                    "Deleted " + successCount + " book(s), failed to delete " + failCount);
-            }
-        }
+    @FXML
+    private void handleCancelDelete() {
+        deleteOverlay.setVisible(false);
     }
 
     private void handleEdit(Book book) {
-        showBookDialog(book);
+        currentBookInModal = book;
+        openModal("Edit Book", book);
+    }
+
+    // ===== MODAL LOGIC =====
+
+    private void openModal(String title, Book book) {
+        modalTitle.setText(title);
+        
+        // Clear or Populate Fields
+        if (book != null) {
+            titleField.setText(book.getTitle());
+            authorField.setText(book.getAuthor());
+            isbnField.setText(book.getIsbn());
+            datePicker.setValue(book.getPublishedDate());
+        } else {
+            titleField.clear();
+            authorField.clear();
+            isbnField.clear();
+            datePicker.setValue(null);
+        }
+        
+        // Show Modal with Fade In
+        modalOverlay.setOpacity(0);
+        modalOverlay.setVisible(true);
+        FadeTransition ft = new FadeTransition(Duration.millis(200), modalOverlay);
+        ft.setFromValue(0);
+        ft.setToValue(1);
+        ft.play();
+    }
+
+    @FXML
+    private void handleCancelModal() {
+        FadeTransition ft = new FadeTransition(Duration.millis(200), modalOverlay);
+        ft.setFromValue(1);
+        ft.setToValue(0);
+        ft.setOnFinished(e -> modalOverlay.setVisible(false));
+        ft.play();
+    }
+
+    @FXML
+    private void handleSaveBook() {
+        String title = titleField.getText();
+        String author = authorField.getText();
+        String isbn = isbnField.getText();
+        LocalDate date = datePicker.getValue();
+        
+        if (!validateBookForm(title, author, isbn, date)) {
+            return;
+        }
+        
+        try {
+            if (currentBookInModal == null) {
+                // Add
+                Book newBook = new Book();
+                newBook.setTitle(title);
+                newBook.setAuthor(author);
+                newBook.setIsbn(isbn);
+                newBook.setPublishedDate(date);
+                newBook.setStatus("Available"); // Default
+                apiService.addBook(newBook);
+                showToast("Book added successfully", "success");
+            } else {
+                // Update
+                currentBookInModal.setTitle(title);
+                currentBookInModal.setAuthor(author);
+                currentBookInModal.setIsbn(isbn);
+                currentBookInModal.setPublishedDate(date);
+                // Status remains unchanged during edit (or handled differently if needed)
+                apiService.updateBook(currentBookInModal.getId(), currentBookInModal);
+                showToast("Book updated successfully", "success");
+            }
+            
+            handleCancelModal();
+            loadBooks();
+            
+        } catch (Exception e) {
+            showToast("Failed to save: " + e.getMessage(), "error");
+        }
+    }
+    
+    // ===== TOAST LOGIC =====
+
+    private void showToast(String message, String type) {
+        toastLabel.setText(message);
+        toastOverlay.setVisible(true);
+        toastOverlay.setOpacity(0);
+        
+        // Slight slide up and fade in
+        toastOverlay.setTranslateY(20);
+        
+        FadeTransition fadeIn = new FadeTransition(Duration.millis(300), toastOverlay);
+        fadeIn.setFromValue(0);
+        fadeIn.setToValue(1);
+        
+        javafx.animation.TranslateTransition slideUp = new javafx.animation.TranslateTransition(Duration.millis(300), toastOverlay);
+        slideUp.setFromY(20);
+        slideUp.setToY(0);
+        
+        javafx.animation.ParallelTransition show = new javafx.animation.ParallelTransition(fadeIn, slideUp);
+        show.play();
+        
+        // Hide after delay
+        PauseTransition delay = new PauseTransition(Duration.seconds(3));
+        delay.setOnFinished(e -> {
+            FadeTransition fadeOut = new FadeTransition(Duration.millis(300), toastOverlay);
+            fadeOut.setFromValue(1);
+            fadeOut.setToValue(0);
+            fadeOut.setOnFinished(ev -> toastOverlay.setVisible(false));
+            fadeOut.play();
+        });
+        
+        show.setOnFinished(e -> delay.play());
+    }
+
+    // ===== VALIDATION =====
+    
+    private boolean validateBookForm(String title, String author, String isbn, LocalDate publishedDate) {
+        if (!ValidationUtils.isValidTitle(title)) {
+            showToast("Invalid title (1-200 chars)", "error");
+            return false;
+        }
+        if (!ValidationUtils.isValidAuthor(author)) {
+            showToast("Invalid author name", "error");
+            return false;
+        }
+        if (!ValidationUtils.isValidISBN(isbn)) {
+            showToast("Invalid ISBN (10-13 digits)", "error");
+            return false;
+        }
+        if (!ValidationUtils.isValidPublishedDate(publishedDate)) {
+            showToast("Invalid date (cannot be future)", "error");
+            return false;
+        }
+        return true;
     }
 
     // ===== PAGINATION HANDLERS =====
@@ -357,135 +517,5 @@ public class LibraryController {
     private void handleLastPage() {
         currentPage = Math.max(0, totalPages - 1);
         loadBooks();
-    }
-
-    @FXML
-    private void handlePageSizeChange() {
-        Integer newSize = pageSizeComboBox.getValue();
-        if (newSize != null && newSize != pageSize) {
-            pageSize = newSize;
-            currentPage = 0; // Reset to first page
-            loadBooks();
-        }
-    }
-
-    // ===== BOOK DIALOG =====
-
-    /**
-     * Show dialog for adding or editing a book.
-     */
-    private void showBookDialog(Book existingBook) {
-        Dialog<Book> dialog = new Dialog<>();
-        dialog.setTitle(existingBook == null ? "Add Book" : "Edit Book");
-        dialog.setHeaderText(null);
-
-        // Set button types
-        ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
-
-        // Create form
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20, 20, 10, 20));
-        grid.getStyleClass().add("form-container");
-
-        TextField titleField = new TextField();
-        titleField.setPromptText("Book Title");
-        TextField authorField = new TextField();
-        authorField.setPromptText("Author Name");
-        TextField isbnField = new TextField();
-        isbnField.setPromptText("ISBN");
-        DatePicker datePicker = new DatePicker();
-        datePicker.setPromptText("Published Date");
-        ComboBox<String> statusCombo = new ComboBox<>();
-        statusCombo.getItems().addAll("Available", "Borrowed");
-        statusCombo.setValue("Available");
-
-        // Populate if editing
-        if (existingBook != null) {
-            titleField.setText(existingBook.getTitle());
-            authorField.setText(existingBook.getAuthor());
-            isbnField.setText(existingBook.getIsbn());
-            datePicker.setValue(existingBook.getPublishedDate());
-            statusCombo.setValue(existingBook.getStatus());
-        }
-
-        grid.add(new Label("Title:"), 0, 0);
-        grid.add(titleField, 1, 0);
-        grid.add(new Label("Author:"), 0, 1);
-        grid.add(authorField, 1, 1);
-        grid.add(new Label("ISBN:"), 0, 2);
-        grid.add(isbnField, 1, 2);
-        grid.add(new Label("Published Date:"), 0, 3);
-        grid.add(datePicker, 1, 3);
-        grid.add(new Label("Status:"), 0, 4);
-        grid.add(statusCombo, 1, 4);
-
-        dialog.getDialogPane().setContent(grid);
-
-        // Enable/disable save button based on validation
-        Button saveButton = (Button) dialog.getDialogPane().lookupButton(saveButtonType);
-        saveButton.addEventFilter(javafx.event.ActionEvent.ACTION, event -> {
-            if (!validateBookForm(titleField.getText(), authorField.getText(), 
-                    isbnField.getText(), datePicker.getValue())) {
-                event.consume();
-            }
-        });
-
-        // Convert result to Book
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == saveButtonType) {
-                Book book = existingBook != null ? existingBook : new Book();
-                book.setTitle(titleField.getText().trim());
-                book.setAuthor(authorField.getText().trim());
-                book.setIsbn(isbnField.getText().trim());
-                book.setPublishedDate(datePicker.getValue());
-                book.setStatus(statusCombo.getValue());
-                return book;
-            }
-            return null;
-        });
-
-        Optional<Book> result = dialog.showAndWait();
-        result.ifPresent(book -> {
-            try {
-                if (existingBook == null) {
-                    // Add new book
-                    apiService.addBook(book);
-                    DialogUtils.showSuccess("Success", "Book added successfully");
-                } else {
-                    // Update existing book
-                    apiService.updateBook(book.getId(), book);
-                    DialogUtils.showSuccess("Success", "Book updated successfully");
-                }
-                loadBooks();
-            } catch (Exception e) {
-                DialogUtils.showError("Error", "Failed to save book: " + e.getMessage());
-            }
-        });
-    }
-
-    /**
-     * Validate book form inputs.
-     */
-    private boolean validateBookForm(String title, String author, String isbn, LocalDate publishedDate) {
-        if (!ValidationUtils.isValidTitle(title)) {
-            DialogUtils.showError("Validation Error", "Please enter a valid title (1-200 characters)");
-            return false;
-        }
-        if (!ValidationUtils.isValidAuthor(author)) {
-            DialogUtils.showError("Validation Error", "Please enter a valid author name (2-100 characters)");
-            return false;
-        }
-        if (!ValidationUtils.isValidISBN(isbn)) {
-            DialogUtils.showError("Validation Error", "Please enter a valid ISBN (10 or 13 digits)");
-            return false;
-        }
-        if (!ValidationUtils.isValidPublishedDate(publishedDate)) {
-            DialogUtils.showError("Validation Error", "Please enter a valid published date (not in the future)");
-            return false;
-        }
-        return true;
     }
 }

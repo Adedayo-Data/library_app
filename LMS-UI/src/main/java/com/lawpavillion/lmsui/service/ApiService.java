@@ -177,21 +177,43 @@ public class ApiService {
     }
 
     /**
-     * Search books by title or author.
+     * Delete multiple books by ID.
      */
-    public List<Book> searchBooks(String query) {
+    public void deleteBooks(List<Long> ids) {
+        for (Long id : ids) {
+            deleteBook(id);
+        }
+    }
+
+    /**
+     * Search books by title or author using backend endpoint.
+     */
+    public Page<Book> searchBooks(String query, int page, int size) {
         try {
-            List<Book> allBooks = getAllBooks();
-            String lowerQuery = query.toLowerCase();
+            String url = BASE_URL + "/search?query=" + query + "&page=" + page + "&size=" + size;
+            ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
             
-            return allBooks.stream()
-                    .filter(book -> 
-                        book.getTitle().toLowerCase().contains(lowerQuery) ||
-                        book.getAuthor().toLowerCase().contains(lowerQuery))
-                    .toList();
+            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+                Map<String, Object> apiResponse = gson.fromJson(response.getBody(), Map.class);
+                Map<String, Object> pageData = (Map<String, Object>) apiResponse.get("data");
+                
+                if (pageData == null) return Page.empty();
+                
+                List<Map<String, Object>> content = (List<Map<String, Object>>) pageData.get("content");
+                if (content == null || content.isEmpty()) return Page.empty();
+                
+                Book[] books = new Book[content.size()];
+                for (int i = 0; i < content.size(); i++) {
+                    books[i] = gson.fromJson(gson.toJson(content.get(i)), Book.class);
+                }
+                
+                int totalElements = ((Double) pageData.get("totalElements")).intValue();
+                return new PageImpl<>(Arrays.asList(books), PageRequest.of(page, size), totalElements);
+            }
+            return Page.empty();
         } catch (Exception e) {
             System.err.println("Error searching books: " + e.getMessage());
-            return Collections.emptyList();
+            return Page.empty();
         }
     }
 }
