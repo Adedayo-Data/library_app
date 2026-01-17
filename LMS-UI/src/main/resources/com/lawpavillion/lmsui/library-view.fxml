@@ -100,7 +100,7 @@
             <!-- Header Card -->
             <HBox styleClass="header-card" alignment="CENTER_LEFT" spacing="12">
                 <VBox spacing="1">
-                    <Label text="Library Management" styleClass="page-title"/>
+                    <Label text="Law Pavillion" styleClass="page-title"/>
                     <Label fx:id="statusLabel" text="Ready" styleClass="page-subtitle"/>
                 </VBox>
                 

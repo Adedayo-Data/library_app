@@ -116,6 +116,59 @@
     -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.1), 2, 0, 0, 1);
 }
 
+/* ===== PAGE HEADER ===== */
+.page-title {
+    -fx-font-size: 36px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1E293B;
+    -fx-font-family: "Segoe UI", "Inter", "Roboto", "Helvetica Neue", sans-serif;
+    -fx-letter-spacing: -0.5px;
+}
+
+.page-subtitle {
+    -fx-font-size: 14px;
+    -fx-font-weight: 400;
+    -fx-text-fill: #64748B;
+}
+
+/* ===== DATE PICKER CALENDAR STYLING ===== */
+/* Reduce overall calendar size */
+.date-picker-popup>*>.calendar {
+    -fx-padding: 8;
+}
+
+/* Reduce month/year navigation button padding */
+.date-picker-popup>*>.month-year-pane {
+    -fx-padding: 4;
+}
+
+.date-picker-popup>*>.month-year-pane>.spinner {
+    -fx-spacing: 2;
+}
+
+/* Reduce arrow button padding significantly */
+.date-picker-popup>*>.month-year-pane>.spinner>.button {
+    -fx-padding: 2 4;
+    -fx-pref-width: 24;
+    -fx-pref-height: 24;
+}
+
+/* Reduce label spacing */
+.date-picker-popup>*>.month-year-pane>.spinner>.label {
+    -fx-padding: 2 8;
+}
+
+/* Make calendar cells more compact */
+.date-picker-popup>*>.calendar>.calendar-grid {
+    -fx-padding: 4;
+}
+
+.date-picker-popup>*>.calendar>.calendar-grid>.day-cell {
+    -fx-padding: 4;
+    -fx-pref-width: 28;
+    -fx-pref-height: 28;
+}
+
 .icon-button {
     -fx-background-color: transparent;
     -fx-cursor: hand;
@@ -485,13 +538,27 @@
 }
 
 .pagination .pagination-control {
-    -fx-background-color: -surface-color;
-    -fx-border-color: -border-color;
-    -fx-border-width: 2;
-    -fx-border-radius: 12;
-    -fx-background-radius: 12;
-    -fx-padding: 10 20;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 6, 0, 0, 3);
+    -fx-background-color: white;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 6 12;
+    -fx-min-width: 36;
+    -fx-min-height: 36;
+    -fx-pref-width: 36;
+    -fx-pref-height: 36;
+}
+
+.pagination .pagination-control:hover {
+    -fx-background-color: #F8FAFC;
+    -fx-border-color: #CBD5E1;
+}
+
+.pagination .pagination-control .text {
+    -fx-fill: #475569;
+    -fx-font-size: 14px;
+    -fx-font-weight: 500;
 }
 
 /* ===== SPACING AND CONTAINERS ===== */
