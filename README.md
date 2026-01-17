@@ -148,22 +148,27 @@ The application communicates with the Spring Boot backend using RestTemplate. Th
 **Paginated Response:**
 ```json
 {
-  "content": [
-    {
-      "id": 1,
-      "title": "Book Title",
-      "author": "Author Name",
-      "isbn": "9780123456789",
-      "publishedDate": "2020-01-15",
-      "status": "Available"
-    }
-  ],
-  "pageable": {
-    "pageNumber": 0,
-    "pageSize": 25
-  },
-  "totalElements": 100,
-  "totalPages": 4
+  "success": true,
+  "message": "All books delivered successfully!",
+  "timestamp": "2026-01-17T09:00:00",
+  "data": {
+    "content": [
+      {
+        "id": 1,
+        "title": "Book Title",
+        "author": "Author Name",
+        "isbn": "9780123456789",
+        "publishedDate": "2020-01-15",
+        "status": "Available"
+      }
+    ],
+    "pageable": {
+      "pageNumber": 0,
+      "pageSize": 25
+    },
+    "totalElements": 100,
+    "totalPages": 4
+  }
 }
 ```
 
@@ -183,6 +188,21 @@ If you see "Failed to fetch books" error:
 1. Verify backend is running on `http://localhost:8080`
 2. Check backend endpoints are accessible
 3. Review backend logs for errors
+
+### ISBN Validation Errors
+
+If a book is not being added and you see a generic error message:
+
+**Cause**: The ISBN number provided is invalid. The backend validates ISBN format but the frontend may show a generic error.
+
+**Solution**: Ensure you're using a valid ISBN-10 or ISBN-13 format:
+- **ISBN-10**: 10 digits (e.g., `0134685997`)
+- **ISBN-13**: 13 digits (e.g., `9780134685991`)
+- Hyphens and spaces are allowed but optional
+
+**Demo ISBN for testing**: `9780134685991`
+
+**Note**: If the book doesn't appear after clicking Save, check the backend logs for validation errors. The ISBN is the most common validation failure.
 
 ### Build Issues
 
