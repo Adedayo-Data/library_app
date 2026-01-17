@@ -20,7 +20,6 @@ A modern, clean JavaFX user interface for the Library Management System. This ap
 - Clean light theme with professional aesthetics
 - Responsive table layout
 - Smooth hover effects and transitions
-- Status badges for book availability
 - Icon-based navigation
 
 ## Technology Stack
@@ -63,8 +62,8 @@ src/main/
 ### 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
-cd LMS-UI
+git clone git@github.com:Adedayo-Data/library_app.git
+cd library_app
 ```
 
 ### 2. Build the Project
@@ -104,7 +103,6 @@ java -jar target/LMS-UI-1.0-SNAPSHOT.jar
    - Author (required, 2-100 characters)
    - ISBN (required, 10 or 13 digits)
    - Published Date (required, not in future)
-   - Status (Available/Borrowed)
 3. Click **Save**
 
 ### Editing a Book
@@ -134,7 +132,6 @@ java -jar target/LMS-UI-1.0-SNAPSHOT.jar
 ### Pagination
 
 - Use **First**, **Previous**, **Next**, **Last** buttons to navigate pages
-- Change page size using the dropdown (10, 25, 50, 100 items per page)
 - Current page and total pages displayed in the center
 
 ## API Integration
@@ -151,22 +148,45 @@ The application communicates with the Spring Boot backend using RestTemplate. Th
 **Paginated Response:**
 ```json
 {
-  "content": [
-    {
-      "id": 1,
-      "title": "Book Title",
-      "author": "Author Name",
-      "isbn": "9780123456789",
-      "publishedDate": "2020-01-15",
-      "status": "Available"
-    }
-  ],
-  "pageable": {
-    "pageNumber": 0,
-    "pageSize": 25
+  "success": true,
+  "message": "All books delivered successfully!",
+  "data": {
+    "content": [
+      {
+        "id": 1,
+        "title": "Book Title",
+        "author": "Author Name",
+        "isbn": "9780123456789",
+        "publishedDate": "2020-01-15"
+      }
+    ],
+    "pageable": {
+      "pageNumber": 0,
+      "pageSize": 25,
+      "sort": {
+        "sorted": true,
+        "unsorted": false,
+        "empty": false
+      },
+      "offset": 0,
+      "paged": true,
+      "unpaged": false
+    },
+    "totalPages": 4,
+    "totalElements": 100,
+    "last": false,
+    "size": 25,
+    "number": 0,
+    "sort": {
+      "sorted": true,
+      "unsorted": false,
+      "empty": false
+    },
+    "numberOfElements": 25,
+    "first": true,
+    "empty": false
   },
-  "totalElements": 100,
-  "totalPages": 4
+  "timestamp": "2024-01-17T10:30:00"
 }
 ```
 
@@ -223,6 +243,7 @@ The UI follows modern design principles:
 
 This project is part of a recruitment exercise.
 
-## Author
+## Developer
 
-Developed as part of JavaFX and Spring Boot recruitment exercise.
+Adedayo Theophilus Adedeji
+[adedejitheophilus2018@gmail.com](mailto:adedejitheophilus2018@gmail.com)
