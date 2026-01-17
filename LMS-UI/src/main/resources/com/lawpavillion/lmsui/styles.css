@@ -9,21 +9,21 @@
     -danger-color: #EF4444;
     -danger-hover: #DC2626;
     -warning-color: #F59E0B;
-    
+
     /* Backgrounds */
     -bg-gradient-start: #F8FAFC;
     -bg-gradient-end: #EDE9FE;
     -surface-color: #FFFFFF;
-    
+
     /* Text Colors */
     -text-primary: #1E293B;
     -text-secondary: #64748B;
     -text-muted: #94A3B8;
-    
+
     /* Borders */
     -border-color: #E2E8F0;
     -border-focus: #6366F1;
-    
+
     /* Shadows */
     -shadow-sm: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 4, 0, 0, 2);
     -shadow-md: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 4);
@@ -31,11 +31,59 @@
     -shadow-xl: dropshadow(gaussian, rgba(99, 102, 241, 0.3), 25, 0, 0, 10);
 }
 
+/* ===== USER AVATAR ===== */
+.user-avatar-container {
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+    -fx-background-radius: 50%;
+}
+
+.user-avatar-container:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+
 /* ===== ROOT STYLING ===== */
 .root {
     -fx-background-color: linear-gradient(to bottom right, -bg-gradient-start, -bg-gradient-end);
     -fx-font-family: "Inter", "SF Pro Display", "Segoe UI", "Roboto", sans-serif;
     -fx-font-size: 14px;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+    -fx-background-color: #1E293B;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 10, 0, 4, 0);
+}
+
+.sidebar-icon-button {
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+    -fx-padding: 8;
+    -fx-background-radius: 12;
+    -fx-min-width: 40;
+    -fx-min-height: 40;
+    -fx-pref-width: 40;
+    -fx-pref-height: 40;
+    -fx-alignment: center;
+}
+
+.sidebar-icon-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-icon-button:pressed {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-danger-button:hover {
+    -fx-background-color: rgba(239, 68, 68, 0.15);
+}
+
+.app-icon-container {
+    -fx-padding: 8;
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 4, 0, 0, 2);
 }
 
 /* ===== NAVIGATION BAR ===== */
