@@ -15,7 +15,7 @@
     <!-- Layer 1: Main Dashboard -->
     <HBox styleClass="main-container">
         <!-- Sidebar -->
-        <VBox styleClass="sidebar" spacing="16" alignment="TOP_CENTER" minWidth="80" maxWidth="80">
+        <VBox styleClass="sidebar" spacing="16" alignment="CENTER" minWidth="80" maxWidth="80">
             <padding>
                 <Insets top="24" bottom="24"/>
             </padding>
@@ -29,12 +29,12 @@
                </javafx.scene.image.ImageView>
             </StackPane>
             
-            <Region minHeight="20"/>
+            <Region VBox.vgrow="SOMETIMES"/>
             
             <!-- Nav Icons -->
             <Button fx:id="searchButton" styleClass="sidebar-icon-button" onAction="#handleSearch">
                 <graphic>
-                    <FontIcon iconLiteral="mdi2m-magnify" iconSize="20" iconColor="#94A3B8"/>
+                    <FontIcon iconLiteral="mdi2m-magnify" iconSize="20" iconColor="white"/>
                 </graphic>
                 <tooltip>
                     <Tooltip text="Search Library"/>
@@ -43,7 +43,7 @@
 
             <Button fx:id="refreshButton" styleClass="sidebar-icon-button" onAction="#handleRefresh">
                 <graphic>
-                    <FontIcon iconLiteral="mdi2r-refresh" iconSize="20" iconColor="#94A3B8"/>
+                    <FontIcon iconLiteral="mdi2r-refresh" iconSize="20" iconColor="white"/>
                 </graphic>
                 <tooltip>
                     <Tooltip text="Refresh"/>
@@ -58,7 +58,7 @@
 
             <Button fx:id="addButton" styleClass="sidebar-icon-button" onAction="#handleAdd">
                 <graphic>
-                    <FontIcon iconLiteral="mdi2p-plus-circle" iconSize="20" iconColor="#6366F1"/>
+                    <FontIcon iconLiteral="mdi2p-plus-circle" iconSize="20" iconColor="white"/>
                 </graphic>
                 <tooltip>
                     <Tooltip text="Add New Book"/>
@@ -75,7 +75,7 @@
                 </tooltip>
             </Button>
 
-            <Region VBox.vgrow="ALWAYS"/>
+            <Region VBox.vgrow="SOMETIMES"/>
             
             <!-- User Avatar -->
             <Label styleClass="user-avatar-container">
@@ -156,7 +156,7 @@
 
     <!-- Layer 2: Form Modal Overlay -->
     <StackPane fx:id="modalOverlay" visible="false" styleClass="modal-backdrop" alignment="CENTER">
-        <VBox styleClass="modal-dialog" maxWidth="450" spacing="20">
+        <VBox styleClass="modal-dialog" maxWidth="500" maxHeight="500" spacing="20">
             <padding>
                 <Insets top="32" right="40" bottom="32" left="40"/>
             </padding>
@@ -228,13 +228,14 @@
         </VBox>
     </StackPane>
 
+
     <!-- Layer 5: Toast Notification -->
     <VBox fx:id="toastOverlay" alignment="BOTTOM_CENTER" visible="false" pickOnBounds="false">
         <padding>
             <Insets bottom="50"/>
         </padding>
-        <StackPane styleClass="toast-bubble">
-             <Label fx:id="toastLabel" text="Operation Successful" styleClass="toast-text"/>
+        <StackPane styleClass="toast-bubble" maxWidth="400">
+             <Label fx:id="toastLabel" text="Operation Successful" styleClass="toast-text" textFill="white"/>
         </StackPane>
     </VBox>
 

@@ -26,6 +26,7 @@ public class LibraryApplication extends Application {
         stage.setScene(scene);
         stage.setMinWidth(1200);
         stage.setMinHeight(700);
+        stage.setMaximized(true); // Start maximized to fit screen
         stage.show();
     }
 

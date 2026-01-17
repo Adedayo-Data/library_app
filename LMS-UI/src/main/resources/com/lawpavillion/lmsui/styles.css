@@ -80,10 +80,21 @@
 }
 
 .app-icon-container {
-    -fx-padding: 8;
-    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-padding: 0;
+}
+
+/* ===== TOAST NOTIFICATIONS ===== */
+.toast-bubble {
+    -fx-background-color: #1E293B;
     -fx-background-radius: 12;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 4, 0, 0, 2);
+    -fx-padding: 16 24;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 15, 0, 0, 5);
+}
+
+.toast-text {
+    -fx-text-fill: white !important;
+    -fx-font-size: 14px;
+    -fx-font-weight: 500;
 }
 
 /* ===== NAVIGATION BAR ===== */
@@ -518,4 +529,37 @@
     -fx-padding: 16 20;
     -fx-spacing: 12;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.04), 6, 0, 0, 2);
+}
+
+/* ===== MODALS ===== */
+.modal-backdrop {
+    -fx-background-color: rgba(0, 0, 0, 0.6);
+}
+
+.modal-dialog {
+    -fx-background-color: white;
+    -fx-background-radius: 16;
+    -fx-border-color: -border-color;
+    -fx-border-width: 1;
+    -fx-border-radius: 16;
+    -fx-padding: 32;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 30, 0, 0, 10);
+}
+
+.modal-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -text-primary;
+}
+
+.delete-card {
+    -fx-max-width: 450;
+}
+
+.search-card {
+    -fx-max-width: 500;
+}
+
+.modal-card {
+    -fx-max-width: 550;
 }
